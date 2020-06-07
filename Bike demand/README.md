@@ -6,3 +6,5 @@ This scripts were created from notebooks using jupytext. To recover the notebook
 jupytext --to notebook scriptname.py
 
 This will create the equivalent notebook named as the original script. 
+
+To run this notebook you will need a test and train dataset that can be downloaded from this link: https://www.kaggle.com/c/bike-sharing-demand/data
