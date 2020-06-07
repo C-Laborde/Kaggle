@@ -1,4 +1,4 @@
-This work was insipired by the following notebooks:
+This work is significantly based on the following notebooks:
 
 https://www.kaggle.com/viveksrinivasan/eda-ensemble-model-top-10-percentile
 
