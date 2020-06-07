@@ -1,3 +1,5 @@
+Bike rental kaggle competition: https://www.kaggle.com/c/bike-sharing-demand/overview
+ 
 This work is significantly based on the following notebooks:
 
 https://www.kaggle.com/viveksrinivasan/eda-ensemble-model-top-10-percentile
