@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.4.2
+#       jupytext_version: 1.4.1
 #   kernelspec:
 #     display_name: Python 3.7.5 64-bit
 #     language: python
@@ -120,7 +120,11 @@ if False:
 #
 # **Count on different seasons, months and hours**
 
-
+count_per_season_hour = df.groupby(["season", "hour"]).mean()["count"]
+sns.set()
+for season in df["season"].unique():
+    sns.pointplot(count_per_season_hour.loc[season].index, count_per_season_hour.loc[season],
+                  hue=df["season"].unique())
 
 # </br>
 #
