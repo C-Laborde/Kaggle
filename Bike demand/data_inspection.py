@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.4.1
+#       jupytext_version: 1.3.3
 #   kernelspec:
 #     display_name: Python 3.7.5 64-bit
 #     language: python
@@ -120,13 +120,39 @@ if False:
 #
 # **Count on different seasons, months and hours**
 
-count_per_season_hour = df.groupby(["season", "hour"]).mean()["count"]
-sns.set()
-for season in df["season"].unique():
-    sns.pointplot(count_per_season_hour.loc[season].index, count_per_season_hour.loc[season],
-                  hue=df["season"].unique())
+# - There seems to be less use on spring than in other seasons which is counterintuitive
 
-# </br>
+# +
+fig, ax = plt.subplots(3, 1)
+plt.rcParams["figure.figsize"] = [12, 16]
+
+# 1) Usage per season
+count_per_season_hour = df.groupby(["season", "hour"]).mean()["count"].reset_index()
+count_per_season_hour["season"] = count_per_season_hour.season.map({1: "Spring", 2 : "Summer", 3 : "Fall", 4 :"Winter" })
+# sns.set()
+sns.pointplot("hour", y="count",data=count_per_season_hour,
+              hue="season", ax=ax[0]);
+ax[0].set(xlabel="Hour", ylabel="Average count", title="Average count per hour per season")
+
+# 2) Usage in weekdays and in weekends
+count_per_weekday = df.groupby(["workingday", "hour"]).mean()["count"].reset_index()
+count_per_weekday["workingday"] = count_per_weekday.workingday.map({1: "workingday", 0: "weekend"})
+sns.pointplot("hour", "count", data=count_per_weekday, hue="workingday", ax=ax[1])
+ax[1].set(xlabel="Hour", ylabel="Average count", title="Average count per hour per weekday")
+
+# 3) Usage per month
+count_per_month = df.groupby(["month"]).mean()["count"].reset_index()
+ax[2].bar(x=count_per_month["month"], height=count_per_month["count"],
+          width=0.8)
+# sns.catplot(x="month", y="count", data=count_per_month, ax=ax[2], kind="bar")
+ax[2].set(xlabel="Month", ylabel="Average count", title="Average count per month");
+plt.tight_layout()
+if False:
+    filename = "Average count vs season-hour-weekday.png"
+    plt.savefig(plot_dir + filename)
+# -
+
+# #### </br>
 #
 # **Correlation analysis** 
 
