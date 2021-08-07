@@ -12,7 +12,16 @@
 #     name: python3
 # ---
 
+# ## OSIC Pulmonary Fibrosis Progression
+#
+# ### Predict lung function decline
+#
+# Link to Kaggle competition: https://www.kaggle.com/c/osic-pulmonary-fibrosis-progression
+#
+# The work on this notebook primarily follows the work done here https://www.kaggle.com/artkulak/inference-45-55-600-epochs-tuned-effnet-b5-30-ep
+
 # +
+import cv2
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
@@ -41,7 +50,13 @@ dcm_patients == fvc_patients
 
 ds = dcmread(train_path + 'DCM/' + 'ID00184637202242062969203/1.dcm')
 
-plt.imshow(ds.pixel_array, cmap=plt.cm.gray)
+ds.pixel_array.max()
+
+2**11
+
+ds.pixel_array.shape
+
+plt.imshow(ds.pixel_array, cmap=plt.cm.plasma)
 
 # Efficientnet B5 (following the competition winner solution https://towardsdatascience.com/how-i-achieved-the-1st-place-in-kaggle-osic-pulmonary-fibrosis-progression-competition-e410962c4edc)
 # Why using B5 and not other Bs?
