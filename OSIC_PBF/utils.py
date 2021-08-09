@@ -13,6 +13,8 @@
 # ---
 
 import efficientnet.tfkeras as efn
+from tensorflow.keras import Model
+from tensorflow.keras.layers import Concatenate, GaussianNoise, GlobalAveragePooling2D, Input
 
 
 def get_efficientnet(model, shape):
@@ -26,3 +28,25 @@ def get_efficientnet(model, shape):
               'b7': efn.EfficientNetB7(input_shape=shape, weights=None, include_top=False)}
 
     return models[model]
+
+
+def build_model(b_model=None, shape=(512, 512, 1)):
+    inp = Input(shape=shape)
+    base = get_efficientnet(b_model, shape)
+    x = base(inp)
+    x = GlobalAveragePooling2D()(x)
+    
+    inp2 = Input(shape=(4,))
+    x2 = GaussianNoise(0.2)(inp2)
+    x = Concatenate()([x, x2])
+    x = Dropout(0.5)(x)
+    x = Dense(1)(x)
+    
+    model = Model([inp, inp2], x)
+    
+    return model
+
+
+build_model(b_model='b5')
+
+
