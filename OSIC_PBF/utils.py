@@ -12,10 +12,15 @@
 #     name: python3
 # ---
 
+# +
+import numpy as np
+
 import efficientnet.tfkeras as efn
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Concatenate, Dense, Dropout, GaussianNoise, GlobalAveragePooling2D, Input
 
+
+# -
 
 def get_efficientnet(model, shape):
     models = {'b0': efn.EfficientNetB0(input_shape=shape, weights=None, include_top=False),
@@ -48,5 +53,13 @@ def build_model(b_model=None, shape=(512, 512, 1)):
 
 
 build_model(b_model='b5')
+
+
+def score(y_pred, y_true, sigma):
+    sigma_clipped = max(sigma, 70)
+    delta = min(abs(y_pred, y_true), 1000)
+    metric = - 2**0.5 * delta / sigma_clipped - np.log(2**0.5 * sigma_clipped)
+    # Shou
+    return metric
 
 
