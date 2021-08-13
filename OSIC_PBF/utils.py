@@ -14,7 +14,7 @@
 
 import efficientnet.tfkeras as efn
 from tensorflow.keras import Model
-from tensorflow.keras.layers import Concatenate, GaussianNoise, GlobalAveragePooling2D, Input
+from tensorflow.keras.layers import Concatenate, Dense, Dropout, GaussianNoise, GlobalAveragePooling2D, Input
 
 
 def get_efficientnet(model, shape):
