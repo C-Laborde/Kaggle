@@ -18,9 +18,11 @@ import numpy as np
 import efficientnet.tfkeras as efn
 from tensorflow.keras import Model
 from tensorflow.keras.layers import Concatenate, Dense, Dropout, GaussianNoise, GlobalAveragePooling2D, Input
-
-
 # -
+
+path = 'data/'
+train_path = path + 'train/'
+
 
 def get_efficientnet(model, shape):
     models = {'b0': efn.EfficientNetB0(input_shape=shape, weights=None, include_top=False),
@@ -59,7 +61,18 @@ def score(y_pred, y_true, sigma):
     sigma_clipped = max(sigma, 70)
     delta = min(abs(y_pred, y_true), 1000)
     metric = - 2**0.5 * delta / sigma_clipped - np.log(2**0.5 * sigma_clipped)
-    # Shou
+    # Should I return the mean of metric?
     return metric
+
+
+# +
+# def encode_feature(row):
+#    vector = [(row.Age - 30) / 30]
+# -
+
+def get_img(path):
+    ds = dcmread(train_path + 'DCM/' + path)
+    # TODO there is some resizing and scaling in the original code here, understand why
+    return ds
 
 
