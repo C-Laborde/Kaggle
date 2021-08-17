@@ -12,9 +12,14 @@
 #     name: python3
 # ---
 
+# +
 import numpy as np
 import os
 import pandas as pd
+
+from utils import build_model
+import tensorflow as tf
+# -
 
 # #### Load data
 
@@ -39,7 +44,8 @@ dcm_patients.remove('.DS_Store')
 
 patients = fvc_train["Patient"].unique()
 
-patients[0]
+# </br>
+# Linear fit
 
 # +
 A = {}
@@ -59,5 +65,42 @@ for p in patients:
     A[p] = a
     P = p
 # -
+
+# </br>
+# Training
+
+EPOCHS = 50
+SAVE_BEST = True
+B_MODEL = 'b5'
+
+# +
+es = tf.keras.callbacks.EarlyStopping(
+        monitor='val_loss',
+        min_delta=0.001,
+        patience=10,
+        mode='auto',
+        baseline=None,
+        restore_best_weights=True)
+
+mcp = tf.keras.callbacks.ModelCheckpoint(
+        filepath=f'models/effnet_{EPOCHS}.h5',
+        monitor='val_loss',
+        save_best_only=SAVE_BEST,
+        mode='auto')
+
+rlp = tf.keras.callbacks.ReduceLROnPlateau(
+        monitor='val_loss',
+        factor=0.1,
+        patience=10,
+        mode='auto',
+        min_delta=0.0001,
+        cooldown=0,
+        min_lr=0)
+# -
+
+model = build_model(b_model=B_MODEL)
+model.compile(optimizer=tf.keras.optimizer.Adam(learning_rate=1e-3),
+              loss=tf.keras.losses.MeanAbsoluteError())
+model.fit
 
 
