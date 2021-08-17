@@ -25,45 +25,39 @@ train_path = path + 'train/'
 fvc_train = pd.read_csv(train_path + 'train.csv')
 fvc_train = fvc_train.sort_values(by=['Patient', 'Weeks'])
 
+# +
 fvc_train['SmokingStatus'] = fvc_train['SmokingStatus'].astype('category')
+fvc_train['SmokingStatusCat'] = fvc_train['SmokingStatus'].cat.codes
+
+fvc_train['Sex'] = fvc_train['Sex'].astype('category')
+fvc_train['SexCat'] = fvc_train['Sex'].cat.codes
+# -
 
 # DCM files
 dcm_patients = sorted(os.listdir(train_path + 'DCM/'))
 dcm_patients.remove('.DS_Store')
 
-vector = [(df.Age.values[0] - 30) / 30]
-
-
-def get_tab(df):
-    vector = [(df.Age.values[0] - 30) / 30] 
-    print("vector 0 ", vector)
-    
-    if df.Sex.values[0].lower() == 'male':
-       vector.append(0)
-    else:
-       vector.append(1)
-    print("vector 1 ", vector)
-    
-    if df.SmokingStatus.values[0] == 'Never smoked':
-        vector.extend([0,0])
-    elif df.SmokingStatus.values[0] == 'Ex-smoker':
-        vector.extend([1,1])
-    elif df.SmokingStatus.values[0] == 'Currently smokes':
-        vector.extend([0,1])
-    else:
-        vector.extend([1,0])
-    print("vector 2 ", vector)
-
-    print("vector 3 ", np.array(vector))
-    return np.array(vector)
-
-
 patients = fvc_train["Patient"].unique()
 
 patients[0]
 
-for p in patients[0:1]:
+# +
+A = {}
+P = []
+# Check TAB!!
+
+for p in patients:
     sub = fvc_train[fvc_train['Patient'] == p]
-    get_tab(sub)
+    fvc = sub.FVC.values
+    weeks = sub.Weeks.values
+    c = np.vstack([weeks, np.ones(len(weeks))]).T
+    
+    # Linear equation, least-squares solution
+    # Why fitting a straight line to fvc trend?
+    a, b = np.linalg.lstsq(c, fvc, rcond=None)[0]
+    
+    A[p] = a
+    P = p
+# -
 
 
