@@ -24,9 +24,9 @@ path = 'data/'
 train_path = path + 'train/'
 
 
-class ImageGenerator(Sequence):
+class ImageDataGenerator(Sequence):
     
-    def __init__(self, ids, dim=(512, 512), batch_size=32, shuffle=True):
+    def __init__(self, ids, dim=(512, 512, 1), batch_size=32, shuffle=True):
         self.ids = ids
         self.batch_size = batch_size
         self.shuffle = shuffle
@@ -45,7 +45,8 @@ class ImageGenerator(Sequence):
         x = np.empty((self.batch_size, *self.dim))
         
         for i, ID in enumerate(idx_temps):
-            x[i,] = dcmread(train_path + 'DCM/' + str(idx_temp) + '.dcm')
+            # Should we resize and normalize here?
+            x[i,] = dcmread(train_path + 'DCM/' + str(idx_temp) + '.dcm').pixel_array
         
         return x
 
