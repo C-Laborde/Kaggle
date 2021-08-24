@@ -20,9 +20,39 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 
 # from classes import classes
-from utils import build_model
+# from utils import build_model
 
 # -
+
+def get_efficientnet(model, shape):
+    models = {'b0': efn.EfficientNetB0(input_shape=shape, weights=None, include_top=False),
+              'b1': efn.EfficientNetB1(input_shape=shape, weights=None, include_top=False),
+              'b2': efn.EfficientNetB2(input_shape=shape, weights=None, include_top=False),
+              'b3': efn.EfficientNetB3(input_shape=shape, weights=None, include_top=False),
+              'b4': efn.EfficientNetB4(input_shape=shape, weights=None, include_top=False),
+              'b5': efn.EfficientNetB5(input_shape=shape, weights=None, include_top=False),
+              'b6': efn.EfficientNetB6(input_shape=shape, weights=None, include_top=False),
+              'b7': efn.EfficientNetB7(input_shape=shape, weights=None, include_top=False)}
+
+    return models[model]
+
+
+def build_model(config):
+    inp = Input(shape=shape)
+    base = get_efficientnet(b_model, shape)
+    x = base(inp)
+    x = GlobalAveragePooling2D()(x)
+    
+    inp2 = Input(shape=(4,))
+    x2 = GaussianNoise(0.2)(inp2)
+    x = Concatenate()([x, x2])
+    x = Dropout(0.5)(x)
+    x = Dense(1)(x)
+    
+    model = Model([inp, inp2], x)
+    
+    return model
+
 
 from tensorflow.keras.utils import Sequence
 class ImageDataGenerator(Sequence):
