@@ -46,6 +46,8 @@ def get_activation_function(name):
 
 
 def build_model(config):
+
+    # Parameteres
     actfunc = get_activation_function[config['ACTIVATION_FUNCTION']]
     drop_out_layers = config['DROP_OUT_LAYERS']
     drop_out_rate = config['DROP_OUT_RATE']
@@ -53,14 +55,14 @@ def build_model(config):
     hidden_layers = config['HIDDEN_LAYERS']
     img_features = config['IMAGE_FEATURES']
     l2_regularization = config['L2_REGULARIZATION']
+    optimal_sigma_loss = config['OPTIMAL_SIGMA_LOSS']
+    optimal_sigma_loss_function = config['OPTIMAL_SIGMA_LOSS_FUNCTION']
     output_normalization = config['OUTPUT_NORMALIZATION']
     pre_batch_normalization = config['PRE_BATCH_NORMALIZATION']
     predict_slope = config['PREDICT_SLOPE']
     size = config['NUMBER_FEATURES']
     use_imgs = config['USE_IMAGES']
 
-
-    
     # Keras Tensor instantiation
     metadata = tf.keras.layers.Input(shape=(size), name='meta_data')
     inputs = [metadata]
@@ -111,6 +113,25 @@ def build_model(config):
     
     if predict_slope:
         WeekDiff = tf.keras.layers.Input(shape = (1), name = 'WeekDiff')
+        InitFVC = tf.keras.layers.Input(shape = (1), name = 'InitFVC')
+        inputs.extend([WeekDiff, InitFVC])
+        FVC_output = tf.add(tf.keras.layers.multiply([FVC_output, WeekDiff]), InitFVC)
+        sigma_output = tf.keras.layers.multiply([sigma_output, WeekDiff])
+        
+    outputs = tf.keras.layers.concatenate([FVC_output, sigma_output])
+    
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    opt = tf.keras.optimizers.Adam()
+    
+    if optimal_sigma_loss:
+        loss = optimal_sigma_loss_function
+    else:
+        loss=(lambda x,y:(laplace_log_likelihood(x, y) + absolute_delta_error(x, y) * loss_modification*SQRT2/70))
+    
+    model.compile(optimizer=opt, loss=loss,
+                  metrics = [laplace_metric, sigma_cost, delta_over_sigma, absolute_delta_error])
+    
+    return model
 
 
 
