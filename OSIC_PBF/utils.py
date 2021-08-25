@@ -24,6 +24,35 @@ path = 'data/'
 train_path = path + 'train/'
 
 
+# +
+
+def get_train_data(df, train_on_backward_weeks=False, use_images=True):
+    index = 0
+    train = pd.DataFrame()
+
+    for patient in df.Patient.unique()[:2]:
+        sub = df[df.Patient == patient]
+        weeks = sub['Weeks']
+        for weektarget in weeks:
+            dftemp = sub[(sub.Weeks != weektarget) & ((sub.Weeks<weektarget) | (train_on_backward_weeks))]
+            dftemp = dftemp.assign(WeekTarget = weektarget)
+            dftemp = dftemp.assign(TargetFVC = sub[sub.Weeks == weektarget]['FVC'].values[0])
+            dftemp = dftemp.assign(PatientIndex = index)
+            train = train.append(dftemp, ignore_index = True)
+        index += 1
+    
+        if use_images:
+
+
+# +
+import pandas as pd
+df = pd.read_csv(train_path + 'train.csv')
+
+get_train_data(df)
+
+
+# -
+
 def get_efficientnet(effnet):
     models = {'b0': efn.EfficientNetB0,
               'b1': efn.EfficientNetB1,
