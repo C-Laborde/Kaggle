@@ -18,49 +18,125 @@
 #
 # Link to Kaggle competition: https://www.kaggle.com/c/osic-pulmonary-fibrosis-progression
 #
-# The work on this notebook primarily follows the work done here https://www.kaggle.com/artkulak/inference-45-55-600-epochs-tuned-effnet-b5-30-ep
+# The work on this notebook primarily follows the work done here https://www.kaggle.com/larsran/pulmonaryfibrosis-environment/notebook?select=pfutils.py
 
 # +
 import cv2
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 import pandas as pd
 from pydicom import dcmread
+# from tqdm import tqdm
 
-import efficientnet.tfkeras as efn
-from tensorflow.keras import models
+from sklearn.model_selection import train_test_split
+
+from classes import ImageGenerator
+from utils import build_model
 # -
+
+# #### Load data
 
 path = 'data/'
 train_path = path + 'train/'
 
 # FVC values
-fvc = pd.read_csv(train_path + 'train.csv')
-fvc = fvc.sort_values(by=['Patient', 'Weeks'])
+fvc_train = pd.read_csv(train_path + 'train.csv')
+fvc_train = fvc_train.sort_values(by=['Patient', 'Weeks'])
 
-fvc.head()
+fvc_train.head()
 
 # DCM files
 dcm_patients = sorted(os.listdir(train_path + 'DCM/'))
 dcm_patients.remove('.DS_Store')
 
-# I want to check if all patients in fvc data has dcm data and viceversa
-fvc_patients = list(sorted(fvc.Patient.unique()))
-dcm_patients == fvc_patients
+# #### Parameters
 
-ds = dcmread(train_path + 'DCM/' + 'ID00184637202242062969203/1.dcm')
+# +
+# Predicting the slope is making the assumption that the decrease is linear
+PREDICT_SLOPE = False
 
-ds.pixel_array.max()
+# Image flags
+USE_IMAGES = True
+DIM = 224
+IMG_FEATURES = 22
+EFFNET = 'b5'
 
-2**11
+OPTIMAL_SIGMA_LOSS = False
 
-ds.pixel_array.shape
+# Dropout rate
+DROP_OUT_RATE = 0
+DROP_OUT_LAYERS = [1, 2]
 
-plt.imshow(ds.pixel_array, cmap=plt.cm.plasma)
+# L2-Regularization
+L2_REGULARIZATION = True
+REGULARIZATION_CONSTANT = 0.0001
 
-# Efficientnet B5 (following the competition winner solution https://towardsdatascience.com/how-i-achieved-the-1st-place-in-kaggle-osic-pulmonary-fibrosis-progression-competition-e410962c4edc)
-# Why using B5 and not other Bs?
-conv_base = efn.EfficientNetB5(weights='imagenet', include_top=False,)
+# Amount of features inputted in NN
+NUMBER_FEATURES = 10
 
-model = models.Sequential()
-model.add(conv_base)
+# Hidden layers
+HIDDEN_LAYERS = [32, 32]
+
+# Activation functions (relu, swish, leakyrely)
+ACTIVATION_FUNCTION = 'relu'
+
+# Batch normalization
+BATCH_NORMALIZATION = False
+PRE_BATCH_NORMALIZATION = False
+BATCH_RENORMALIZATION = False
+
+# Train length
+EPOCHS = 500
+
+config = dict(PREDICT_SLOPE=PREDICT_SLOPE, USE_IMAGES=USE_IMAGES, DIM=DIM, IMG_FEATURES=IMG_FEATURES,
+              EFFNET=EFFNET, OPTIMAL_SIGMA_LOSS=OPTIMAL_SIGMA_LOSS, DROP_OUT_RATE=DROP_OUT_RATE,
+              DROP_OUT_LAYERS=DROP_OUT_LAYERS, L2_REGULARIZATION=L2_REGULARIZATION,
+              REGULARIZATION_CONSTANT=REGULARIZATION_CONSTANT, NUMBER_FEATURES=NUMBER_FEATURES,
+              HIDDEN_LAYERS=HIDDEN_LAYERS, ACTIVATION_FUNCTION=ACTIVATION_FUNCTION,
+              BATCH_NORMALIZATION=BATCH_NORMALIZATION, PRE_BATCH_NORMALIZATION=PRE_BATCH_NORMALIZATION
+              BATCH_RENORMALIZATION=BATCH_RENORMALIZATION, EPOCHS=EPOCHS)
+# -
+
+# #### Build model
+
+# +
+b_effnet = 'b5'
+
+model = build_model(b_effnet)
+# -
+
+# #### Prepare data
+
+train, val = train_test_split(fvc_train.Patient.unique(), shuffle=True, train_size=0.8)
+
+# We have to match rows fvc data for a specific patient with his/her corresponding DCM data
+x = []
+rows = []
+for p in val:
+    
+
+
+
+def get_tab(df):
+    vector = [(df.Age.values[0] - 30) / 30] 
+    
+    if df.Sex.values[0] == 'male':
+       vector.append(0)
+    else:
+       vector.append(1)
+    
+    if df.SmokingStatus.values[0] == 'Never smoked':
+        vector.extend([0,0])
+    elif df.SmokingStatus.values[0] == 'Ex-smoker':
+        vector.extend([1,1])
+    elif df.SmokingStatus.values[0] == 'Currently smokes':
+        vector.extend([0,1])
+    else:
+        vector.extend([1,0])
+    return np.array(vector) 
+
+
+get_tab(fvc_train[fvc_train.Patient == "ID00422637202311677017371"])
+
+
