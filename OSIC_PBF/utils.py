@@ -24,11 +24,16 @@ path = 'data/'
 train_path = path + 'train/'
 
 
-# +
+def get_img(path):
+    ds = dcmread(train_path + 'DCM/' + path)
+    # TODO there is some resizing and scaling in the original code here, understand why
+    return ds
+
 
 def get_train_data(df, train_on_backward_weeks=False, use_images=True):
     index = 0
     train = pd.DataFrame()
+    images = []
 
     for patient in df.Patient.unique()[:2]:
         sub = df[df.Patient == patient]
@@ -41,10 +46,13 @@ def get_train_data(df, train_on_backward_weeks=False, use_images=True):
             train = train.append(dftemp, ignore_index = True)
         index += 1
     
-        if use_images:
+        images_files = os.listdir(train_path + 'DCM/' + patient)
+        images_dcm = [get_img(train_path + 'DCM/' + patient + i) for i in images_files]
+        images.append(images_dcm)
+            
 
 
-# +
+# + jupyter={"outputs_hidden": true} tags=[]
 import pandas as pd
 df = pd.read_csv(train_path + 'train.csv')
 
@@ -174,15 +182,11 @@ def score(y_pred, y_true, sigma):
     # Should I return the mean of metric?
     return metric
 
-
 # +
 # def encode_feature(row):
 #    vector = [(row.Age - 30) / 30]
 # -
 
-def get_img(path):
-    ds = dcmread(train_path + 'DCM/' + path)
-    # TODO there is some resizing and scaling in the original code here, understand why
-    return ds
+
 
 
